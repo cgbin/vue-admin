@@ -23,16 +23,15 @@ function listToTreeMulti(list, root = 0, pk = 'id', pid = 'pid', child = 'childr
   return tree
 }
 
-function getParentsId(list, id, pk = 'id', pid = 'pid') {
-  let tree = []
+function getParentsId(list, id , tree) {
+
   if (list) {
     list.forEach(item => {
-      if (item[pk] === id) {
-        tree.unshift(item[pid])
-        const parent = getParentsId(list, item[pid], pk, pid)
-        if (parent.length) {
-          tree = tree.concat(parent)
+      if (item['id'] === id) {
+        if(item['pid'] > 0){
+          tree.unshift(item['pid'])
         }
+        getParentsId(list, item['pid'], tree)
       }
     })
   }
