@@ -22,4 +22,7 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+<<<<<<< HEAD
 # vue-admin
+=======
+>>>>>>> 7c370e7e43dee680cfe0e1643c49d4e264dba8f4
