@@ -55,11 +55,7 @@
           <span>{{ scope.row.component }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="图标"  width="100px" align="center">
-        <template slot-scope="scope">
-          <svg-icon :icon-class= "scope.row.icon"/>
-        </template>
-      </el-table-column>
+
       <el-table-column label="类型"  width="100px" align="center">
         <template slot-scope="scope">
           <el-button type="primary" plain v-if="scope.row.ptype == 1">菜单</el-button>
@@ -86,7 +82,7 @@
     </tree-table>
 
     <!-- 表单 -->
-    <detailForm ref="fromDetail" :rule-list="list" @updateRow="updateRow" />
+    <detailForm ref="fromDetail" :rule-list="list" @closeDrawerForm="closeRulesDrawerForm" />
 
   </div>
 </template>
@@ -124,7 +120,8 @@ export default {
       columns: [
         {
           text: '名称',
-          value: 'title'
+          value: 'title',
+          icon:true
         }
       ],
       listQuery: {
@@ -179,8 +176,11 @@ export default {
       this.list = tree.upadteArr(this.list, 'id', id, statusObj)
       change(id, 'status', 1 - status).then(response => {})
     },
-    updateRow(temp) {
-      this.fetchList()
+    //关闭权限编辑表单
+    closeRulesDrawerForm(flag) {
+      if(flag){
+        this.fetchList()
+      }
     },
     handleDelete(index, id) {
       const _this = this

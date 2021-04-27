@@ -7,9 +7,9 @@
       </template>
     </el-table-column>
     <el-table-column v-for="column in columns" v-else :key="column.value" :label="column.text" :width="column.width">
-
       <template slot-scope="scope">
-        {{ scope.row[column.value] }}
+        <svg-icon v-if="column.icon" :icon-class= "scope.row.icon"/>
+          {{ scope.row[column.value] }}
       </template>
     </el-table-column>
     <slot />

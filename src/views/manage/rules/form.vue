@@ -1,10 +1,11 @@
 <template>
   <el-drawer
     v-if="dialogFormVisible"
+    :title="dialogTitle"
     ref="drawer"
-    :with-header="false"
+    with-header
     size="50%"
-    :before-close="handleClose"
+    @close="handleClose(0)"
     :visible.sync="dialogFormVisible"
     direction="rtl"
     custom-class="demo-drawer"
@@ -12,8 +13,7 @@
     <div class="demo-drawer__content">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 100%; padding:10px; height: 100vh;overflow-y: scroll;">
 
-        <el-tabs tab-position="top" style="height: 200px;">
-          <el-tab-pane label="基本信息">
+        
             <el-form-item label="上级" prop="pid">
               <el-cascader v-model="pid" :options="getRulesList" :props="props_pid"  filterable placeholder="请选择"  @change="handleChange" />
             </el-form-item>
@@ -65,12 +65,9 @@
                 <el-radio :label="0">否</el-radio>
               </el-radio-group>
             </el-form-item>
-          </el-tab-pane>
-        </el-tabs>
-
       </el-form>
       <div class="demo-drawer__footer" style="position:fixed;top:15px;right:30px;">
-        <el-button size="mini" @click="$refs.drawer.closeDrawer()">取 消</el-button>
+        <el-button size="mini" @click="handleClose(0)">取 消</el-button>
         <el-button size="mini" :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
       </div>
     </div>
@@ -117,6 +114,7 @@ export default {
         ptype:1, //类型， 1菜单，2按钮
       },
       dialogFormVisible: false,
+      dialogTitle:'新增权限',
       rules: {
         title: [{ required: true, message: '名称必填', trigger: 'blur' }],
         name: [{ required: true, message: '标识必填', trigger: 'blur' }],
@@ -148,21 +146,11 @@ export default {
     //  console.log(this.pid);
   },
   destroyed() {
-
   },
   methods: {
-    handleClose(done) {
-      if (this.btnLoading) {
-        return
-      }
-      this.$confirm('更改将不会被保存，确定要取消吗？')
-        .then(_ => {
-          this.dialogFormVisible = false
-        })
-        .catch(_ => {})
-    },
     handleCreate() {
-      this.dialogStatus = 'create'
+      const _this = this
+      _this.dialogTitle = '新增权限'
       this.temp = {
         id: 0,
         pid: 0,
@@ -182,43 +170,46 @@ export default {
       this.currentIndex = -1
       this.pid = []
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.dialogFormVisible = true;
       })
     },
+    //编辑权限
     async handleUpdate(id) {
-      this.dialogStatus = 'update'
       const _this = this
+      _this.dialogTitle = '编辑权限'
       _this.pid = [];
       const response  = await getinfo(id)
       if (response.status === 1) {
-        _this.temp = response.data
+         _this.temp = response.data
+
         //获取父级栏目的id数组
         tree.getParentsId(_this.ruleList, id , _this.pid)
       }
-      this.dialogFormVisible = true
+      
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.dialogFormVisible = true;
       })
     
     },
+    //保存数据
     saveData() {
       this.btnLoading = true
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const _this = this
           const d = this.temp
+          console.log(d);
           save(d).then(response => {
+            _this.btnLoading = false
             if (response.status === 1) {
               if (!d.id) {
                 d.id2 = response.data.id
               }
-              this.$emit('updateRow', d)
-              _this.dialogFormVisible = false
               _this.$message.success(response.msg)
+              this.handleClose(1) //新增成功
             } else {
               _this.$message.error(response.msg)
             }
-            _this.btnLoading = false
           // eslint-disable-next-line handle-callback-err
           }).catch((error) => {
             this.btnLoading = false
@@ -228,6 +219,16 @@ export default {
         }
       })
     },
+    handleClose(flag) {
+      if (this.btnLoading) {
+        return
+      }
+      //关闭并重置表单
+      this.$refs["dataForm"].resetFields();
+      this.dialogFormVisible = false;
+      this.$emit("closeDrawerForm", flag);
+    },
+    //处理选项的改变
     handleChange(value) {
       if (value.length) {
         this.temp.pid = value[value.length - 1]
