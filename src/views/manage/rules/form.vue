@@ -1,5 +1,6 @@
 <template>
   <el-drawer
+    v-if="dialogFormVisible"
     ref="drawer"
     :with-header="false"
     size="50%"
@@ -14,7 +15,7 @@
         <el-tabs tab-position="top" style="height: 200px;">
           <el-tab-pane label="基本信息">
             <el-form-item label="上级" prop="pid">
-              <el-cascader v-model="pid" :options="getRulesList" :props="props_pid"  filterable placeholder="请选择" change-on-select @change="handleChange" />
+              <el-cascader v-model="pid" :options="getRulesList" :props="props_pid"  filterable placeholder="请选择"  @change="handleChange" />
             </el-form-item>
             <el-form-item label="名称" prop="title">
               <el-input v-model="temp.title" clearable />
@@ -93,7 +94,13 @@ export default {
       btnLoading: false,
       ruleTop: [{ 'id': 0, 'title': '顶级' }],
       pid: [],
-      props_pid: { 'label': 'title', 'value': 'id' },
+      props_pid: { 
+        label: 'title', 
+        value: 'id' , 
+        expandTrigger: 'hover', 
+        children:'children',  
+        checkStrictly:true, //取消父子关联，可选子节点
+      },
       temp: {
         id: 0,
         pid: 0,
@@ -125,9 +132,9 @@ export default {
     }
   },
   watch: {
-    dialogFormVisible: function() {
-      this.resetTemp()
-    },
+    // dialogFormVisible: function() {
+    //   this.resetTemp()
+    // },
     temp: {
       handler(newVal, oldVal) {},
       immediate: true,
@@ -135,7 +142,10 @@ export default {
     }
   },
   created() {
-
+     
+  },
+  mounted(){
+    //  console.log(this.pid);
   },
   destroyed() {
 
@@ -151,7 +161,8 @@ export default {
         })
         .catch(_ => {})
     },
-    resetTemp() {
+    handleCreate() {
+      this.dialogStatus = 'create'
       this.temp = {
         id: 0,
         pid: 0,
@@ -164,11 +175,9 @@ export default {
         hidden: 0,
         no_cache: 1,
         always_show: 1,
-        redirect: 'noredirect'
+        redirect: '',
+        ptype:1, //类型， 1菜单，2按钮
       }
-    },
-    handleCreate() {
-      this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.currentIndex = -1
       this.pid = []
@@ -176,30 +185,21 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    handleUpdate(id) {
+    async handleUpdate(id) {
       this.dialogStatus = 'update'
-      this.dialogFormVisible = true
       const _this = this
-      getinfo(id).then(response => {
-        if (response.status === 1) {
-          _this.temp.id = response.data.id
-          _this.temp.pid = response.data.pid
-          _this.temp.title = response.data.title
-          _this.temp.name = response.data.name
-          _this.temp.status = response.data.status
-          _this.temp.icon = response.data.icon
-          _this.temp.path = response.data.path
-          _this.temp.component = response.data.component
-          _this.temp.hidden = response.data.hidden
-          _this.temp.no_cache = response.data.no_cache
-          _this.temp.always_show = response.data.always_show
-          _this.temp.redirect = response.data.redirect
-          _this.pid = tree.getParentsId(_this.ruleList, id)
-        }
-      })
+      _this.pid = [];
+      const response  = await getinfo(id)
+      if (response.status === 1) {
+        _this.temp = response.data
+        //获取父级栏目的id数组
+        tree.getParentsId(_this.ruleList, id , _this.pid)
+      }
+      this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+    
     },
     saveData() {
       this.btnLoading = true

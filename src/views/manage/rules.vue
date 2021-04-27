@@ -37,19 +37,15 @@
       fit
       highlight-current-row
       style="width: 100%;"
+      default-expand-all
       @selection-change="handleSelectionChange"
     >
-      <el-table-column label="标识" width="150px" align="center">
+      <el-table-column label="标识"  align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="图标" width="120px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.icon }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="路径" width="150px" align="center">
+      <el-table-column label="路径"  align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.path }}</span>
         </template>
@@ -59,7 +55,19 @@
           <span>{{ scope.row.component }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="80px" align="center">
+      <el-table-column label="图标"  width="100px" align="center">
+        <template slot-scope="scope">
+          <svg-icon :icon-class= "scope.row.icon"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="类型"  width="100px" align="center">
+        <template slot-scope="scope">
+          <el-button type="primary" plain v-if="scope.row.ptype == 1">菜单</el-button>
+          <el-button type="danger" plain v-else-if="scope.row.ptype == 2">按钮</el-button>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="状态" width="100px" align="center">
         <template slot-scope="scope">
           <span :class="{'el-icon-success text-green':scope.row.status == 1,'el-icon-error text-red':scope.row.status == 0}" @click="handleModifyStatus(scope.$index,scope.row.id,scope.row.status)">{{ scope.row.status | statusFilter }}</span>
         </template>
