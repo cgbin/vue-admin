@@ -149,8 +149,7 @@ export default {
   },
   methods: {
     handleCreate() {
-      const _this = this
-      _this.dialogTitle = '新增权限'
+      this.dialogTitle = '新增权限'
       this.temp = {
         id: 0,
         pid: 0,
@@ -166,10 +165,10 @@ export default {
         redirect: '',
         ptype:1, //类型， 1菜单，2按钮
       }
-      this.dialogFormVisible = true
       this.currentIndex = -1
       this.pid = []
       this.$nextTick(() => {
+        this.btnLoading = false
         this.dialogFormVisible = true;
       })
     },
@@ -181,12 +180,16 @@ export default {
       const response  = await getinfo(id)
       if (response.status === 1) {
          _this.temp = response.data
-
-        //获取父级栏目的id数组
-        tree.getParentsId(_this.ruleList, id , _this.pid)
+         if(response.data.pid > 0){
+            //获取父级栏目的id数组
+            tree.getParentsId(_this.ruleList, id , _this.pid)
+         }else{
+            _this.pid = [0];
+         }
+        
       }
-      
       this.$nextTick(() => {
+        this.btnLoading = false
         this.dialogFormVisible = true;
       })
     

@@ -96,7 +96,7 @@
     </div>
 
     <!-- 表单 -->
-    <detailForm ref="fromDetail" @updateRow="updateRow" />
+    <detailForm v-if="detailFormVisible" ref="fromDetail" @closeDrawerForm="closeRolesDrawerForm" />
 
   </div>
 </template>
@@ -139,7 +139,7 @@ export default {
       buttonDisabled: true,
       deleting: false,
       pickerOptions: pickerOptions,
-      currentIndex: -1
+      detailFormVisible : false,
     }
   },
   watch: {
@@ -190,23 +190,23 @@ export default {
       this.selectedRows = val
     },
     handleCreate() {
-      this.$refs.fromDetail.handleCreate()
+      this.detailFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs.fromDetail.handleCreate()
+      })
     },
     handleUpdate(index, id) {
-      this.currentIndex = index
-      this.$refs.fromDetail.handleUpdate(id)
+      this.detailFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs.fromDetail.handleUpdate(id)
+      })
+      
     },
-    updateRow(temp) {
-      if (this.currentIndex >= 0 && temp.id > 0) {
-        this.list.splice(this.currentIndex, 1, temp)
-      } else {
-        if (this.list.length >= 10) {
-          this.list.pop()
-        }
-        this.list.push(temp)
-        this.total = this.total + 1
+    closeRolesDrawerForm(flag) {
+      if(flag){
+        this.fetchList()
       }
-      this.currentIndex = -1
+      this.detailFormVisible = false;
     },
     handleDelete(index, id) {
       const _this = this
@@ -218,9 +218,8 @@ export default {
         _this.$set(_this.list[index], 'delete', true)
         del(id).then(response => {
           if (response.status === 1) {
-            _this.list.splice(index, 1)
-            _this.total = _this.total - 1
             _this.$notify.success(response.msg)
+            _this.fetchList()
           } else {
             _this.$notify.error(response.msg)
           }
@@ -249,17 +248,8 @@ export default {
           const idstr = ids.join(',')
           delAll({ ids: idstr }).then(response => {
             if (response.status === 1) {
-              const delindex = []
-              _this.list.forEach(function(item, index, input) {
-                if (ids.indexOf(item.id) > -1) {
-                  delindex.push(index)
-                }
-              })
-              for (let i = delindex.length - 1; i >= 0; i--) {
-                _this.list.splice(delindex[i], 1)
-              }
-              _this.total = _this.total - delindex.length
               _this.$message.success(response.msg)
+              _this.fetchList()
             } else {
               _this.$message.error(response.msg)
             }

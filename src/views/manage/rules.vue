@@ -82,7 +82,7 @@
     </tree-table>
 
     <!-- 表单 -->
-    <detailForm ref="fromDetail" :rule-list="list" @closeDrawerForm="closeRulesDrawerForm" />
+    <detailForm ref="fromDetail" v-if="detailFormVisible" :rule-list="list" @closeDrawerForm="closeRulesDrawerForm" />
 
   </div>
 </template>
@@ -129,7 +129,8 @@ export default {
         title: ''
       },
       buttonDisabled: true,
-      deleting: false
+      deleting: false,
+      detailFormVisible:false
     }
   },
   computed: {
@@ -166,10 +167,16 @@ export default {
       this.selectedRows = val
     },
     handleCreate() {
-      this.$refs.fromDetail.handleCreate()
+      this.detailFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs.fromDetail.handleCreate()
+      })
     },
     handleUpdate(index, id) {
-      this.$refs.fromDetail.handleUpdate(id)
+      this.detailFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs.fromDetail.handleUpdate(id)
+      })
     },
     handleModifyStatus(index, id, status) {
       const statusObj = { 'status': 1 - status }
@@ -181,6 +188,7 @@ export default {
       if(flag){
         this.fetchList()
       }
+      this.detailFormVisible = false;
     },
     handleDelete(index, id) {
       const _this = this

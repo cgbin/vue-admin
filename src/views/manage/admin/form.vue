@@ -1,9 +1,11 @@
 <template>
   <el-drawer
+    v-if="dialogFormVisible"
+    :title="dialogTitle"
     ref="drawer"
-    :with-header="false"
+    with-header
     size="50%"
-    :before-close="handleClose"
+    @close="handleClose(0)"
     :visible.sync="dialogFormVisible"
     direction="rtl"
     custom-class="demo-drawer"
@@ -11,8 +13,6 @@
     <div class="demo-drawer__content">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 100%; padding:10px; height: 100vh;overflow-y: scroll;">
 
-        <el-tabs tab-position="top" style="height: 200px;">
-          <el-tab-pane tabIndex=-1 label="基本信息">
             <el-form-item label="角色" prop="group_id">
               <el-select v-model="temp.group_id" class="filter-item" placeholder="请选择">
                 <el-option v-for="item in roles" :key="item.id" :label="item.title" :value="item.id" />
@@ -42,12 +42,10 @@
                 <el-radio :label="0">禁用</el-radio>
               </el-radio-group>
             </el-form-item>
-          </el-tab-pane>
-        </el-tabs>
 
       </el-form>
       <div class="demo-drawer__footer" style="position:fixed;top:15px;right:30px;">
-        <el-button size="mini" @click="$refs.drawer.closeDrawer()">取 消</el-button>
+        <el-button size="mini" @click="handleClose(0)">取 消</el-button>
         <el-button size="mini" :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
       </div>
     </div>
@@ -121,6 +119,7 @@ export default {
         'x-access-token': getToken()
       },
       dialogFormVisible: false,
+      dialogTitle:'新增用户',
       rules: {
         group_id: [{ required: true, message: '角色必选', trigger: 'change' }],
         username: [{ required: true, message: '账号必填', trigger: 'blur' }, { validator: checkUsername, message: '账号格式是字母，数字，下划线，长度6-18位', trigger: 'blur' }],
@@ -132,9 +131,6 @@ export default {
     }
   },
   watch: {
-    dialogFormVisible: function() {
-      this.resetTemp()
-    },
     temp: {
       handler(newVal, oldVal) {},
       immediate: true,
@@ -148,22 +144,13 @@ export default {
 
   },
   methods: {
-    handleClose(done) {
-      if (this.btnLoading) {
-        return
-      }
-      this.$confirm('更改将不会被保存，确定要取消吗？')
-        .then(_ => {
-          this.dialogFormVisible = false
-        })
-        .catch(_ => {})
-    },
     getRoles() {
       getListAll().then(response => {
         this.roles = response.data.data
       })
     },
-    resetTemp() {
+    handleCreate() {
+      this.dialogTitle = '新增用户';
       this.temp = {
         id: 0,
         group_id: '',
@@ -175,34 +162,21 @@ export default {
         email: '',
         img: ''
       }
-    },
-    handleCreate() {
-      this.btnLoading = false
-      this.dialogFormVisible = true
-      this.currentIndex = -1
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.btnLoading = false
+        this.dialogFormVisible = true
       })
     },
-    handleUpdate(id) {
-      this.btnLoading = false
-      this.dialogFormVisible = true
+    async handleUpdate(id) {
       const _this = this
-      getinfo(id).then(response => {
-        if (response.status === 1) {
-          _this.temp.id = response.data.id
-          _this.temp.group_id = response.data.group_id
-          _this.temp.username = response.data.username
-          _this.temp.realname = response.data.realname
-          _this.temp.is_enabled = response.data.is_enabled
-          _this.temp.phone = response.data.phone
-          _this.temp.email = response.data.email
-          _this.temp.password = ''
-          _this.temp.img = response.data.img
-        }
-      })
+      _this.dialogTitle = '编辑用户'
+      const response = await getinfo(id) 
+      if (response.status === 1) {
+        _this.temp = response.data
+      }
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.btnLoading = false
+        this.dialogFormVisible = true
       })
     },
     saveData() {
@@ -211,17 +185,17 @@ export default {
         if (valid) {
           const _this = this
           save(this.temp).then(response => {
+            _this.btnLoading = false
             if (response.status === 1) {
               if (!_this.temp.id) {
                 _this.temp.id = response.data.id
               }
-              this.$emit('updateRow', _this.temp)
-              _this.dialogFormVisible = false
               _this.$message.success(response.msg)
+              this.handleClose(1) //新增成功
             } else {
               _this.$message.error(response.msg)
             }
-            _this.btnLoading = false
+            
           }).catch((error) => {
             _this.$message.error(error)
             this.btnLoading = false
@@ -230,7 +204,17 @@ export default {
           this.btnLoading = false
         }
       })
-    }
+    },
+    handleClose(flag) {
+      if (this.btnLoading) {
+        return
+      }
+      //关闭并重置表单
+      this.defaultChecked = [];
+      this.$refs["dataForm"].resetFields();
+      this.dialogFormVisible = false;
+      this.$emit("closeDrawerForm", flag);
+    },
   }
 }
 </script>

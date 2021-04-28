@@ -79,7 +79,7 @@
       </el-table-column>
       <el-table-column label="头像" width="70px" fixed>
         <template slot-scope="scope">
-          <span class="link-type" @click="handleImg(scope.row.img)"><img :src="scope.row.img" width="40" height="40"></span>
+          <span class="link-type" @click="handleImg(scope.row.img)"><img v-if="scope.row.img" :src="scope.row.img" width="40" height="40"></span>
         </template>
       </el-table-column>
       <el-table-column label="用户名" min-width="100px" fixed>
@@ -150,7 +150,7 @@
     </div>
 
     <!-- 表单 -->
-    <detailForm ref="fromDetail" @updateRow="updateRow" />
+    <detailForm ref="fromDetail" v-if="detailFormVisible"  @closeDrawerForm="closeUserDrawerForm" />
 
   </div>
 </template>
@@ -202,6 +202,7 @@ export default {
       deleting: false,
       dateTime: '',
       pickerOptions: pickerOptions,
+      detailFormVisible : false,
       currentIndex: -1
     }
   },
@@ -265,23 +266,22 @@ export default {
       openWindow(img, '图片预览', '500', '400')
     },
     handleCreate() {
-      this.$refs.fromDetail.handleCreate()
+      this.detailFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs.fromDetail.handleCreate()
+      })
     },
     handleUpdate(index, id) {
-      this.currentIndex = index
-      this.$refs.fromDetail.handleUpdate(id)
+      this.detailFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs.fromDetail.handleUpdate(id)
+      })
     },
-    updateRow(temp) {
-      if (this.currentIndex >= 0 && temp.id > 0) {
-        this.list.splice(this.currentIndex, 1, temp)
-      } else {
-        if (this.list.length >= 10) {
-          this.list.pop()
-        }
-        this.list.unshift(temp)
-        this.total = this.total + 1
+    closeUserDrawerForm(flag) {
+      if(flag){
+        this.fetchList()
       }
-      this.currentIndex = -1
+      this.detailFormVisible = false;
     },
     handleDelete(index, id) {
       const _this = this
@@ -293,8 +293,7 @@ export default {
         _this.$set(_this.list[index], 'delete', true)
         del(id).then(response => {
           if (response.status === 1) {
-            _this.list.splice(index, 1)
-            _this.total = _this.total - 1
+            _this.fetchList()
             _this.$notify.success(response.msg)
           } else {
             _this.$notify.error(response.msg)
@@ -324,17 +323,8 @@ export default {
           const idstr = ids.join(',')
           delAll({ ids: idstr }).then(response => {
             if (response.status === 1) {
-              const delindex = []
-              _this.list.forEach(function(item, index, input) {
-                if (ids.indexOf(item.id) > -1) {
-                  delindex.push(index)
-                }
-              })
-              for (let i = delindex.length - 1; i >= 0; i--) {
-                _this.list.splice(delindex[i], 1)
-              }
-              _this.total = _this.total - delindex.length
               _this.$message.success(response.msg)
+              _this.fetchList()
             } else {
               _this.$message.error(response.msg)
             }
