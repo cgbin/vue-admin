@@ -143,7 +143,7 @@ export default {
      
   },
   mounted(){
-    //  console.log(this.pid);
+
   },
   destroyed() {
   },
@@ -201,7 +201,6 @@ export default {
         if (valid) {
           const _this = this
           const d = this.temp
-          console.log(d);
           save(d).then(response => {
             _this.btnLoading = false
             if (response.status === 1) {

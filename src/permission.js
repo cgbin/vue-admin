@@ -13,13 +13,10 @@ const whiteList = ['/login'] // no redirect whitelist
 router.beforeEach(async(to, from, next) => {
   // start progress bar
   NProgress.start()
-
   // set page title
   document.title = getPageTitle(to.meta.title)
-
   // determine whether the user has logged in
   const hasToken = getToken()
-
   if (hasToken) {
     if (to.path === '/login') {
       // if is logged in, redirect to the home page
@@ -29,7 +26,6 @@ router.beforeEach(async(to, from, next) => {
       // determine whether the user has obtained his permission roles through getInfo
       const hasRoles = store.getters.roles
       if (hasRoles) {
-        
         next()
       } else {
         try {
@@ -39,10 +35,19 @@ router.beforeEach(async(to, from, next) => {
           const accessRoutes = await store.dispatch('permission/generateRoutes', access)
           // dynamically add accessible routes
           router.addRoutes(accessRoutes)
+          //判断当前重定向的url是否在用户拥有的路由权限中，没有的话，跳转回首页
+          const router_path_arr = store.getters && store.getters.router_path_arr
+          const hasRoutePermission = router_path_arr.some( path => {
+            return to.path === path;
+          })
+          if(!hasRoutePermission){
+              next({ path: '/' })
+          }else{
+              // hack method to ensure that addRoutes is complete
+              // set the replace: true, so the navigation will not leave a history record
+              next({ ...to, replace: true })
+          }
 
-          // hack method to ensure that addRoutes is complete
-          // set the replace: true, so the navigation will not leave a history record
-          next({ ...to, replace: true })
         } catch (error) {
           // remove token and go to login page to re-login
           await store.dispatch('user/resetToken')
@@ -54,7 +59,6 @@ router.beforeEach(async(to, from, next) => {
     }
   } else {
     /* has no token*/
-
     if (whiteList.indexOf(to.path) !== -1) {
       // in the free login whitelist, go directly
       next()

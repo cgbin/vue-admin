@@ -21,7 +21,7 @@ export default {
       }
     } else {
       // throw new Error(`need roles! Like v-permission="['admin','editor']"`)
-      throw new Error(`need roles! Like v-permission="'article/blog/eidit'`)
+      throw new Error(`need roles! Like v-permission="'/article/blog/eidit'`)
     }
   }
 }
