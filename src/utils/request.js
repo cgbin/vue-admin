@@ -58,13 +58,6 @@ service.interceptors.response.use(
             location.reload()
           })
         })
-      } else {
-        Message({
-          message: res.msg || 'Error',
-          type: 'error',
-          showClose: true,
-          duration: 3 * 1000
-        })
       }
     }
     return res
@@ -72,7 +65,7 @@ service.interceptors.response.use(
   error => {
     console.log('err' + error) // for debug
     Message({
-      message: error.message || 'Error',
+      message: error.message || 'Promise.reject Error',
       type: 'error',
       showClose: true,
       duration: 3 * 1000

@@ -148,6 +148,8 @@ export default {
                   }
                   this.$message.success(response.msg)
                   this.handleClose(1) //新增成功
+                } else {
+                  this.$message.error(response.msg)
                 }
         } else {
           this.btnLoading = false
