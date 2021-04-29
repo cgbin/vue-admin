@@ -36,16 +36,20 @@ router.beforeEach(async(to, from, next) => {
           // dynamically add accessible routes
           router.addRoutes(accessRoutes)
           //判断当前重定向的url是否在用户拥有的路由权限中，没有的话，跳转回首页
-          const router_path_arr = store.getters && store.getters.router_path_arr
-          const hasRoutePermission = router_path_arr.some( path => {
-            return to.path === path;
-          })
-          if(!hasRoutePermission){
+          const router_path_arr = store.getters && store.getters.router_path_arr;
+          if(router_path_arr){
+            const hasRoutePermission = router_path_arr.some( path => {
+              return to.path === path;
+            })
+            if(!hasRoutePermission){
               next({ path: '/' })
-          }else{
-              // hack method to ensure that addRoutes is complete
-              // set the replace: true, so the navigation will not leave a history record
+            }else{
               next({ ...to, replace: true })
+            }
+          }else{
+            // hack method to ensure that addRoutes is complete
+            // set the replace: true, so the navigation will not leave a history record
+            next({ ...to, replace: true })
           }
 
         } catch (error) {

@@ -197,7 +197,6 @@ export default {
             }
             
           }).catch((error) => {
-            _this.$message.error(error)
             this.btnLoading = false
           })
         } else {
