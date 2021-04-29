@@ -54,7 +54,6 @@ export default {
     return {
       btnLoading: false,
       treeData:[],
-      ruleList: [],
       temp: {
         id: 0,
         title: '',
@@ -81,30 +80,31 @@ export default {
 
   },
   created() {
-    this.getRules()
+    //不在此调用获取权限列表是由于 handleUpdate()的方法有时会比 getRules 先执行，导致 this.treeData 的值为空
+    // this.getRules()
   },
   destroyed() {
   },
   methods: {
-    getRules() {
-      getListAll().then(response => {
-        this.ruleList = response.data.data
-      }).then(()=>{
-        this.treeData =  treeUtil.listToTreeMulti(this.ruleList)
-      })
+    async getRules() {
+      const response_tree = await getListAll();
+      this.treeData = response_tree.data.data
     },
     //获取选中的节点数据
     getChecked() {
-      const CheckedKeys= [ 
-      //获取全选数据
-      ...this.$refs.tree.getCheckedKeys(),
-      //获取半选数据
-      ...this.$refs.tree.getHalfCheckedKeys(),
-      ];
-      if(!CheckedKeys){
-        this.temp.rules = ''
-      }
-      this.temp.rules = CheckedKeys.join(',');
+      return new Promise(resolve => {
+          const CheckedKeys= [ 
+          //获取全选数据
+          ...this.$refs.tree.getCheckedKeys(),
+          //获取半选数据
+          ...this.$refs.tree.getHalfCheckedKeys(),
+          ];
+          if(CheckedKeys.length === 0){
+            resolve('')
+          }else{
+            resolve(CheckedKeys.join(','))
+          }
+      })
     },
     handleCreate() {
       this.dialogTitle = '新增角色'
@@ -114,6 +114,7 @@ export default {
         status: 1,
         rules: ''
       }
+      this.getRules()
       this.$nextTick(() => {
         this.btnLoading = false
         this.dialogFormVisible = true
@@ -121,39 +122,33 @@ export default {
     },
     async handleUpdate(id) {
       this.dialogTitle = '编辑角色'
+      await this.getRules()
       const response = await getinfo(id);
-      if (response.status === 1) {
-          this.temp = response.data 
-      }
+      this.temp = response.data 
       //设置已选中的数据
-      console.log(this.treeData) //经常会获取不到
       await treeUtil.getRoleAuthListData(this.treeData,this.temp.rules.split(','), this.defaultChecked)
       
       this.$nextTick(() => {
         this.btnLoading = false
         this.dialogFormVisible = true
-        //  this.$refs.tree.setCheckedKeys(_this.temp.rules.split(','))
       })
     },
     saveData() {
       this.btnLoading = true
-      
       this.$refs['dataForm'].validate(async(valid) => {
         if (valid) {
-          await this.getChecked() //获取选中的节点
-          const _this = this
-          const d = _this.temp
-          const response = await save(d)
-            _this.btnLoading = false
-            if (response.status === 1) {
-              if (!d.id) {
-                d.id = response.data.id
-              }
-              _this.$message.success(response.msg)
-              this.handleClose(1) //新增成功
-            } else {
-              _this.$message.error(response.msg)
-            }
+                this.temp.rules = await this.getChecked() //获取选中的节点
+                const _this = this
+                const d = _this.temp
+                const response = await save(d)
+                this.btnLoading = false
+                if (response.status === 1) {
+                  if (!d.id) {
+                    d.id = response.data.id
+                  }
+                  this.$message.success(response.msg)
+                  this.handleClose(1) //新增成功
+                }
         } else {
           this.btnLoading = false
         }

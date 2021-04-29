@@ -202,7 +202,7 @@ export default {
           const _this = this
           const d = this.temp
           save(d).then(response => {
-            _this.btnLoading = false
+           
             if (response.status === 1) {
               if (!d.id) {
                 d.id2 = response.data.id
@@ -212,6 +212,7 @@ export default {
             } else {
               _this.$message.error(response.msg)
             }
+             _this.btnLoading = false
           // eslint-disable-next-line handle-callback-err
           }).catch((error) => {
             this.btnLoading = false

@@ -24,18 +24,19 @@ function listToTreeMulti(list, root = 0, pk = 'id', pid = 'pid', child = 'childr
 }
 
 
+
 //递归获取无子级权限数组
 function getRoleAuthListData(node , selected_arr = []  , arr = []) {
+
   if(node){
     node.forEach(item => {
       //不存在子节点，则为选中的最后一级节点
-      if(!item.children && (selected_arr.indexOf(item.id) > -1)){
+      if((item.children.length === 0) && (selected_arr.indexOf(item.id) > -1)){
         return arr.push(item.id);
       }
       this.getRoleAuthListData(item.children, selected_arr, arr);
     });
   }
-  return arr
 }
 
 function getParentsId(list, id , tree) {
