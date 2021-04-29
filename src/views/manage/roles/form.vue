@@ -1,18 +1,15 @@
-
 <template>
-  <el-drawer
+  <el-dialog
     v-if="dialogFormVisible"
     :title="dialogTitle"
     ref="drawer"
-    with-header
-    size="50%"
+    width="760px"
     @close="handleClose(0)"
     :visible.sync="dialogFormVisible"
-    direction="rtl"
-    custom-class="demo-drawer"
   >
-    <div class="demo-drawer__content">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 100%; padding:10px; height: 100vh;overflow-y: scroll;">
+    <div class="demo-dialog__content">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="right" label-width="70px">
+            
             <el-form-item label="名称" prop="title">
               <el-input v-model="temp.title" clearable />
             </el-form-item>
@@ -33,14 +30,13 @@
                 node-key="id"
               />
             </el-form-item>
-
       </el-form>
-      <div class="demo-drawer__footer" style="position:fixed;top:15px;right:30px;">
-        <el-button size="mini" @click="handleClose(0)">取 消</el-button>
-        <el-button size="mini" :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
-      </div>
     </div>
-  </el-drawer>
+      <div slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="handleClose(0)">取 消</el-button>
+        <el-button size="medium" :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
+      </div>
+  </el-dialog>
 </template>
 
 <script>
@@ -142,15 +138,15 @@ export default {
                 const _this = this
                 const d = _this.temp
                 const response = await save(d)
-                this.btnLoading = false
+                _this.btnLoading = false
                 if (response.status === 1) {
                   if (!d.id) {
                     d.id = response.data.id
                   }
-                  this.$message.success(response.msg)
-                  this.handleClose(1) //新增成功
+                  _this.$message.success(response.msg)
+                  _this.handleClose(1) //新增成功
                 } else {
-                  this.$message.error(response.msg)
+                  _this.$message.error(response.msg)
                 }
             }catch(error){
               // catch 的 error错误信息使用 error.message 打印

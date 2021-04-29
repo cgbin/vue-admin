@@ -14,9 +14,7 @@ body {
   font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
 }
 
-label {
-  font-weight: 700;
-}
+
 
 html {
   height: 100%;
@@ -173,8 +171,6 @@ aside {
 }
 
 .filter-container {
-  padding-bottom: 10px;
-
   .filter-item {
     display: inline-block;
     vertical-align: middle;

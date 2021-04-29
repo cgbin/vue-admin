@@ -1,40 +1,36 @@
 <template>
-  <el-drawer
+  <el-dialog
     v-if="dialogFormVisible"
     :title="dialogTitle"
+    width="760px"
     ref="drawer"
-    with-header
-    size="50%"
     @close="handleClose(0)"
     :visible.sync="dialogFormVisible"
-    direction="rtl"
-    custom-class="demo-drawer"
   >
-    <div class="demo-drawer__content">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 100%; padding:10px; height: 100vh;overflow-y: scroll;">
-
-        
+    <div class="demo-dialog__content">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="right" label-width="80px">
+          <el-row :gutter="15">
+            <el-col :span="24" :sm="12">   
             <el-form-item label="上级" prop="pid">
               <el-cascader v-model="pid" :options="getRulesList" :props="props_pid"  filterable placeholder="请选择"  @change="handleChange" />
             </el-form-item>
             <el-form-item label="名称" prop="title">
               <el-input v-model="temp.title" clearable />
             </el-form-item>
-            <el-form-item label="标识" prop="name">
+            <el-form-item label="权限标识" prop="name">
               <el-input v-model="temp.name" clearable />
             </el-form-item>
             <el-form-item label="图标" prop="icon">
               <el-input v-model="temp.icon" clearable />
             </el-form-item>
-            <el-form-item label="路径" prop="path">
+            <el-form-item label="路由地址" prop="path">
               <el-input v-model="temp.path" clearable />
             </el-form-item>
-            <el-form-item label="组件" prop="component">
+            <el-form-item label="组件路径" prop="component">
               <el-input v-model="temp.component" clearable />
             </el-form-item>
-            <el-form-item label="跳转" prop="redirect">
-              <el-input v-model="temp.redirect" clearable />
-            </el-form-item>           
+           </el-col>
+           <el-col :span="24" :sm="12">          
              <el-form-item label="类型">
               <el-radio-group v-model="temp.ptype">
                 <el-radio :label="1">菜单</el-radio>
@@ -65,13 +61,18 @@
                 <el-radio :label="0">否</el-radio>
               </el-radio-group>
             </el-form-item>
+            <el-form-item label="跳转" prop="redirect">
+              <el-input v-model="temp.redirect" clearable />
+            </el-form-item> 
+            </el-col>
+          </el-row>
       </el-form>
-      <div class="demo-drawer__footer" style="position:fixed;top:15px;right:30px;">
-        <el-button size="mini" @click="handleClose(0)">取 消</el-button>
-        <el-button size="mini" :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
-      </div>
     </div>
-  </el-drawer>
+    <div slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="handleClose(0)">取 消</el-button>
+        <el-button size="medium" :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script>
@@ -200,21 +201,21 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const _this = this
-          const d = this.temp
+          const d = _this.temp
           save(d).then(response => {
+            _this.btnLoading = false
             if (response.status === 1) {
               if (!d.id) {
                 d.id2 = response.data.id
               }
-              this.$message.success(response.msg)
-              this.handleClose(1) //新增成功
+              _this.$message.success(response.msg)
+              _this.handleClose(1) //新增成功
             } else {
-              this.$message.error(response.msg)
+              _this.$message.error(response.msg)
             }
-             this.btnLoading = false
           // eslint-disable-next-line handle-callback-err
           }).catch((error) => {
-            this.btnLoading = false
+            _this.btnLoading = false
           })
         } else {
           this.btnLoading = false
