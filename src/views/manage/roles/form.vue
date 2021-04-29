@@ -25,14 +25,12 @@
             <el-form-item label="权限">
               <el-tree
                 ref="tree"
-                :data="getRulesList"
+                :data="treeData"
                 :default-checked-keys="defaultChecked"
                 :props="defaultProps"
                 default-expand-all
-                show-checkbox
-                check-strictly
+                show-checkbox   
                 node-key="id"
-                @check="checkHandle"
               />
             </el-form-item>
 
@@ -55,6 +53,7 @@ export default {
   data() {
     return {
       btnLoading: false,
+      treeData:[],
       ruleList: [],
       temp: {
         id: 0,
@@ -76,9 +75,7 @@ export default {
     }
   },
   computed: {
-    getRulesList() {
-      return treeUtil.listToTreeMulti(this.ruleList)
-    }
+
   },
   watch: {
 
@@ -92,10 +89,12 @@ export default {
     getRules() {
       getListAll().then(response => {
         this.ruleList = response.data.data
+      }).then(()=>{
+        this.treeData =  treeUtil.listToTreeMulti(this.ruleList)
       })
     },
-    //处理选中的节点数据
-    checkHandle(data) {
+    //获取选中的节点数据
+    getChecked() {
       const CheckedKeys= [ 
       //获取全选数据
       ...this.$refs.tree.getCheckedKeys(),
@@ -121,26 +120,31 @@ export default {
       })
     },
     async handleUpdate(id) {
-      const _this = this
-      _this.dialogTitle = '编辑角色'
+      this.dialogTitle = '编辑角色'
       const response = await getinfo(id);
       if (response.status === 1) {
-          _this.temp = response.data 
+          this.temp = response.data 
       }
-      this.btnLoading = false
-      this.dialogFormVisible = true
+      //设置已选中的数据
+      console.log(this.treeData) //经常会获取不到
+      await treeUtil.getRoleAuthListData(this.treeData,this.temp.rules.split(','), this.defaultChecked)
+      
       this.$nextTick(() => {
-         this.$refs.tree.setCheckedKeys(_this.temp.rules.split(','))
+        this.btnLoading = false
+        this.dialogFormVisible = true
+        //  this.$refs.tree.setCheckedKeys(_this.temp.rules.split(','))
       })
     },
     saveData() {
       this.btnLoading = true
-      this.$refs['dataForm'].validate((valid) => {
+      
+      this.$refs['dataForm'].validate(async(valid) => {
         if (valid) {
+          await this.getChecked() //获取选中的节点
           const _this = this
-          const d = this.temp
-          save(d).then(response => {
-             _this.btnLoading = false
+          const d = _this.temp
+          const response = await save(d)
+            _this.btnLoading = false
             if (response.status === 1) {
               if (!d.id) {
                 d.id = response.data.id
@@ -150,11 +154,6 @@ export default {
             } else {
               _this.$message.error(response.msg)
             }
-           
-          // eslint-disable-next-line handle-callback-err
-          }).catch((error) => {
-            this.btnLoading = false
-          })
         } else {
           this.btnLoading = false
         }

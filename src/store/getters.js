@@ -12,6 +12,6 @@ const getters = {
   group: state => state.user.group,
   buttons: state => state.user.buttons,
   permission_routes: state => state.permission.routes,
-
+  router_path_arr: state => state.permission.router_path_arr,
 }
 export default getters
