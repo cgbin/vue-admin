@@ -46,6 +46,11 @@ service.interceptors.response.use(
     const res = response.data
     // 业务逻辑错误
     if (res.status !== 1) {
+      Message({
+        message: res.msg || 'Error',
+        type: 'error',
+        duration: 5 * 1000
+      })
       // token 过期了
       if (res.code === 11102 || res.code === 11103) {
         // to re-login
@@ -59,11 +64,13 @@ service.interceptors.response.use(
           })
         })
       }
+      return Promise.reject(new Error(res.msg || 'Status.reject Error'))
+    } else {
+      return res
     }
-    return res
   },
   error => {
-    console.log('err' + error) // for debug
+    console.log('err' + error) // for debug  Error: Request ，使用 error.message 获取信息
     Message({
       message: error.message || 'Promise.reject Error',
       type: 'error',

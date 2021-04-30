@@ -48,10 +48,8 @@
 
 // to fixed https://github.com/ElemeFE/element/issues/2461
 .el-dialog {
-  transform: none;
-  left: 0;
-  position: relative;
-  margin: 0 auto;
+  border-radius: 4px;
+  max-width: calc(100vw - 30px);
 }
 
 // refine element ui upload
@@ -81,4 +79,31 @@
 // to fix el-date-picker css style
 .el-range-separator {
   box-sizing: content-box;
+}
+
+.el-select,.el-cascader{
+  width: 100%;
+}
+.el-dialog__title {
+  font-size: 16px;
+}
+//reset el-form
+.el-dialog__header {
+  padding-top: 14px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid #ededed;
+}
+
+.ele-dialog-form .el-dialog__body {
+  padding-bottom: 0;
+}
+
+.el-dialog__body {
+  padding-top: 22px;
+  padding-bottom: 22px;
+}
+
+.el-dialog__footer {
+  padding-bottom: 12px;
+  border-top: 1px solid #f4f4f4;
 }

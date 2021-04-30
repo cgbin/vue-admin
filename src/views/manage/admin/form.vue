@@ -1,18 +1,16 @@
 <template>
-  <el-drawer
+  <el-dialog
     v-if="dialogFormVisible"
     :title="dialogTitle"
+    width="760px"
     ref="drawer"
-    with-header
-    size="50%"
     @close="handleClose(0)"
     :visible.sync="dialogFormVisible"
-    direction="rtl"
-    custom-class="demo-drawer"
   >
-    <div class="demo-drawer__content">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 100%; padding:10px; height: 100vh;overflow-y: scroll;">
-
+    <div class="demo-dialog__content">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="right" label-width="60px">
+          <el-row :gutter="15">
+            <el-col :span="24" :sm="12">
             <el-form-item label="角色" prop="group_id">
               <el-select v-model="temp.group_id" class="filter-item" placeholder="请选择">
                 <el-option v-for="item in roles" :key="item.id" :label="item.title" :value="item.id" />
@@ -21,15 +19,15 @@
             <el-form-item label="账号" prop="username">
               <el-input v-model="temp.username" clearable />
             </el-form-item>
+
             <el-form-item label="密码" prop="password">
               <el-input v-model="temp.password" clearable placeholder="不修改则留空" />
-            </el-form-item>
-            <el-form-item label="头像" prop="img">
-              <Uploadone v-model="temp.img" :config="config" :header="header" />
             </el-form-item>
             <el-form-item label="姓名" prop="realname">
               <el-input v-model="temp.realname" clearable />
             </el-form-item>
+            </el-col>
+           <el-col :span="24" :sm="12">
             <el-form-item label="手机" prop="phone">
               <el-input v-model="temp.phone" clearable />
             </el-form-item>
@@ -42,14 +40,18 @@
                 <el-radio :label="0">禁用</el-radio>
               </el-radio-group>
             </el-form-item>
-
+            <el-form-item label="头像" prop="img">
+              <Uploadone v-model="temp.img" :config="config" :header="header" />
+            </el-form-item>
+           </el-col>
+          </el-row>
       </el-form>
-      <div class="demo-drawer__footer" style="position:fixed;top:15px;right:30px;">
-        <el-button size="mini" @click="handleClose(0)">取 消</el-button>
-        <el-button size="mini" :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
-      </div>
     </div>
-  </el-drawer>
+    <div slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="handleClose(0)">取 消</el-button>
+        <el-button size="medium" :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
+      </div>
+  </el-dialog>
 </template>
 
 <script>
@@ -184,7 +186,8 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const _this = this
-          save(this.temp).then(response => {
+          const d = _this.temp
+          save(d).then(response => {
             _this.btnLoading = false
             if (response.status === 1) {
               if (!_this.temp.id) {
@@ -195,10 +198,8 @@ export default {
             } else {
               _this.$message.error(response.msg)
             }
-            
           }).catch((error) => {
-            _this.$message.error(error)
-            this.btnLoading = false
+            _this.btnLoading = false
           })
         } else {
           this.btnLoading = false

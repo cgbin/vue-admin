@@ -3,15 +3,12 @@
     <!-- 操作 -->
     <el-row style="margin-bottom: 10px;">
       <el-col :xs="24" :sm="24" :lg="24">
-        <el-tooltip content="刷新" placement="top">
-          <el-button v-waves type="warning" icon="el-icon-refresh" circle @click="handleFilterClear" />
-        </el-tooltip>
-        <el-tooltip content="添加" placement="top">
-          <el-button v-waves type="success" icon="el-icon-plus" circle @click="handleCreate" />
-        </el-tooltip>
-        <el-tooltip content="删除" placement="top">
-          <el-button v-waves :loading="deleting" :disabled="buttonDisabled" type="danger" icon="el-icon-delete" circle @click="handleDeleteAll()" />
-        </el-tooltip>
+          <el-button v-waves type="warning" icon="el-icon-refresh" size="small"  @click="handleFilterClear" >刷新</el-button>
+          <el-button v-waves type="success" icon="el-icon-plus" size="small" @click="handleCreate" >添加权限</el-button>
+          <el-button v-waves :loading="deleting" 
+          :disabled="buttonDisabled" size="small" type="danger" icon="el-icon-delete" 
+           @click="handleDeleteAll()">批量删除</el-button>
+        
         <el-tooltip content="更多" placement="top">
           <el-dropdown trigger="click" placement="bottom" style="margin-left: 10px;" @command="handleCommand">
             <el-button :disabled="buttonDisabled" type="Info" circle>
@@ -35,22 +32,23 @@
       :columns="columns"
       border
       fit
+      size="medium"
       highlight-current-row
       style="width: 100%;"
       default-expand-all
       @selection-change="handleSelectionChange"
     >
-      <el-table-column label="标识"  align="center">
+      <el-table-column label="权限标识"  align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="路径"  align="center">
+      <el-table-column label="路由地址"  align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.path }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="组件" width="150px" align="center">
+      <el-table-column label="组件路径" width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.component }}</span>
         </template>
@@ -58,8 +56,8 @@
 
       <el-table-column label="类型"  width="100px" align="center">
         <template slot-scope="scope">
-          <el-button type="primary" plain v-if="scope.row.ptype == 1">菜单</el-button>
-          <el-button type="danger" plain v-else-if="scope.row.ptype == 2">按钮</el-button>
+          <el-tag size="small" v-if="scope.row.ptype == 1">菜单</el-tag>
+          <el-tag size="small" type="success" v-else-if="scope.row.ptype == 2">按钮</el-tag>
         </template>
       </el-table-column>
 
@@ -69,14 +67,10 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" align="center" width="120px" class-name="small-padding">
+      <el-table-column label="操作" align="center" width="180px"  class-name="small-padding">
         <template slot-scope="scope">
-          <el-tooltip content="编辑" placement="top">
-            <el-button v-waves type="primary" icon="el-icon-edit-outline" circle @click="handleUpdate(scope.$index,scope.row.id)" />
-          </el-tooltip>
-          <el-tooltip content="删除" placement="top">
-            <el-button v-waves :loading="scope.row.delete" type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index,scope.row.id)" />
-          </el-tooltip>
+            <el-button v-waves type="primary" icon="el-icon-edit-outline" size="small" @click="handleUpdate(scope.$index,scope.row.id)" >编辑</el-button>
+            <el-button v-waves :loading="scope.row.delete" type="danger" icon="el-icon-delete" size="small" @click="handleDelete(scope.$index,scope.row.id)" >删除</el-button>
         </template>
       </el-table-column>
     </tree-table>

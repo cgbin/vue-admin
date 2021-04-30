@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <!-- 搜索 -->
-    <div v-if="showSearch" class="filter-container">
+    <div class="filter-container">
       <el-form :inline="true" :model="listQuery" class="form-inline">
         <el-form-item label="">
           <el-input v-model="listQuery.username" placeholder="用户名" clearable size="small" />
@@ -34,18 +34,13 @@
     <!-- 操作 -->
     <el-row style="margin-bottom: 10px;">
       <el-col :xs="24" :sm="24" :lg="24">
-        <el-tooltip content="刷新" placement="top">
-          <el-button v-waves type="warning" icon="el-icon-refresh" circle @click="handleFilterClear" />
-        </el-tooltip>
-        <el-tooltip content="添加" placement="top">
-          <el-button v-waves type="success" icon="el-icon-plus" circle @click="handleCreate" />
-        </el-tooltip>
-        <el-tooltip content="搜索" placement="top">
-          <el-button v-waves type="primary" icon="el-icon-search" circle @click="showSearch = !showSearch" />
-        </el-tooltip>
-        <el-tooltip content="删除" placement="top">
-          <el-button v-waves :loading="deleting" :disabled="buttonDisabled" type="danger" icon="el-icon-delete" circle @click="handleDeleteAll()" />
-        </el-tooltip>
+
+          <el-button v-waves type="warning" icon="el-icon-refresh" size="small"  @click="handleFilterClear" >刷新</el-button>
+          <el-button v-waves type="success" icon="el-icon-plus" size="small" @click="handleCreate" >添加管理员</el-button>      
+          <el-button v-waves :loading="deleting" 
+          :disabled="buttonDisabled" size="small" type="danger" icon="el-icon-delete" 
+           @click="handleDeleteAll()">批量删除</el-button>
+
         <el-tooltip content="更多" placement="top">
           <el-dropdown trigger="click" placement="bottom" style="margin-left: 10px;" @command="handleCommand">
             <el-button :disabled="buttonDisabled" type="Info" circle>
@@ -72,17 +67,17 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column label="ID" align="center" width="150" fixed>
+      <el-table-column label="ID" align="center" width="60" >
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="头像" width="70px" fixed>
+      <el-table-column label="头像" width="70px">
         <template slot-scope="scope">
           <span class="link-type" @click="handleImg(scope.row.img)"><img v-if="scope.row.img" :src="scope.row.img" width="40" height="40"></span>
         </template>
       </el-table-column>
-      <el-table-column label="用户名" min-width="100px" fixed>
+      <el-table-column label="用户名" min-width="100px" >
         <template slot-scope="scope">
           <span class="link-type" @click="handleUpdate(scope.$index,scope.row.id)">{{ scope.row.username }}</span>
         </template>
@@ -132,14 +127,10 @@
           <span>{{ scope.row.create_time }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="120px" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column label="操作" align="center" width="180px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="scope">
-          <el-tooltip content="编辑" placement="top">
-            <el-button v-waves type="primary" icon="el-icon-edit-outline" circle @click="handleUpdate(scope.$index,scope.row.id)" />
-          </el-tooltip>
-          <el-tooltip content="删除" placement="top">
-            <el-button v-waves :loading="scope.row.delete" type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index,scope.row.id)" />
-          </el-tooltip>
+            <el-button v-waves type="primary" icon="el-icon-edit-outline" size="small" @click="handleUpdate(scope.$index,scope.row.id)" >编辑</el-button>
+            <el-button v-waves :loading="scope.row.delete" type="danger" icon="el-icon-delete" size="small" @click="handleDelete(scope.$index,scope.row.id)" >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -150,7 +141,7 @@
     </div>
 
     <!-- 表单 -->
-    <detailForm ref="fromDetail" v-if="detailFormVisible"  @closeDrawerForm="closeUserDrawerForm" />
+    <detailForm ref="fromDetail"   @closeDrawerForm="closeUserDrawerForm" />
 
   </div>
 </template>
@@ -187,7 +178,6 @@ export default {
       total: null,
       selectedRows: null,
       listLoading: true,
-      showSearch: false,
       listQuery: {
         page: 1,
         psize: 10,
