@@ -8,7 +8,7 @@
     </el-table-column>
     <el-table-column v-for="column in columns" v-else :key="column.value" :label="column.text" :width="column.width">
       <template slot-scope="scope">
-        <svg-icon v-if="column.icon" :icon-class= "scope.row.icon"/>
+        <icon-item v-if="column.icon" :icon="scope.row.icon" />
           {{ scope.row[column.value] }}
       </template>
     </el-table-column>
@@ -17,6 +17,8 @@
 </template>
 
 <script>
+import iconItem from '@/layout/components/Sidebar/Item.vue'
+
 export default {
   name: 'TreeTable',
   props: {
@@ -35,6 +37,9 @@ export default {
       type: Boolean,
       default: false
     }
+  },
+  components:{
+    iconItem
   },
   computed: {
     // 格式化数据源

@@ -27,6 +27,7 @@
 
     .scrollbar-wrapper {
       overflow-x: hidden !important;
+      margin-right: -6px;  //修正移动端右侧溢出
     }
 
     .el-scrollbar__bar.is-vertical {
@@ -53,8 +54,17 @@
       overflow: hidden;
     }
 
-    .svg-icon {
-      margin-right: 16px;
+    .svg-icon{
+      margin-right: 8px;
+    }
+
+    .sub-el-icon {
+      margin-right: 6px;
+      margin-left: -6px;
+    }
+    
+    i{
+      color: inherit;
     }
 
     .el-menu {
@@ -78,10 +88,11 @@
     & .nest-menu .el-submenu>.el-submenu__title,
     & .el-submenu .el-menu-item {
       min-width: $sideBarWidth !important;
-      background-color: $subMenuBg !important;
-
       &:hover {
-        background-color: $subMenuHover !important;
+        color: $menuActiveText !important;
+      }
+      &.is-active {
+        background-color: $elMenuActiveBackground !important;
       }
     }
   }
@@ -102,8 +113,11 @@
       .el-tooltip {
         padding: 0 !important;
 
-        .svg-icon {
+        .svg-icon{
           margin-left: 20px;
+        }
+        .sub-el-icon {
+          margin-left: 14px;
         }
       }
     }
@@ -114,10 +128,12 @@
       &>.el-submenu__title {
         padding: 0 !important;
 
-        .svg-icon {
+        .svg-icon{
           margin-left: 20px;
         }
-
+        .sub-el-icon {
+          margin-left: 14px;
+        }
         .el-submenu__icon-arrow {
           display: none;
         }
@@ -175,8 +191,12 @@
 // when menu collapsed
 .el-menu--vertical {
   &>.el-menu {
-    .svg-icon {
-      margin-right: 16px;
+    .svg-icon{
+      margin-right: 8px;
+    }
+    .sub-el-icon {
+      margin-right: 6px;
+      margin-left: -6px;
     }
   }
 
