@@ -10,15 +10,21 @@ export default {
     title: {
       type: String,
       default: ''
-    }
+    },
+    iclass: {
+      type: String,
+      default(){
+        return 'sub-el-icon'
+      }
+    },
   },
   render(h, context) {
-    const { icon, title } = context.props
+    const { icon, title , iclass} = context.props
     const vnodes = []
 
     if (icon) {
       if (icon.includes('el-icon')) {
-        vnodes.push(<i class={[icon, 'sub-el-icon']} />)
+        vnodes.push(<i class={[icon, iclass]} />)
       } else {
         vnodes.push(<svg-icon icon-class={icon}/>)
       }

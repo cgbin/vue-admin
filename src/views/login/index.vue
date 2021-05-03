@@ -172,6 +172,7 @@ export default {
               this.loading = false
             })
             .catch(() => {
+              this.getCaptcha() //验证失败重新获取验证码
               this.loading = false
             })
         } else {

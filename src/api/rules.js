@@ -8,10 +8,11 @@ export function getList(query) {
   })
 }
 
-export function getListAll() {
+export function getListAll(query) {
   return request({
     url: '/admin/rules/getlists',
-    method: 'post'
+    method: 'post',
+    data:query
   })
 }
 
@@ -25,7 +26,7 @@ export function getinfo(id) {
 
 export function save(data) {
   return request({
-    url: '/admin/rules/save',
+    url: data.id > 0? '/admin/rules/edit' :'/admin/rules/save',
     method: 'post',
     data
   })

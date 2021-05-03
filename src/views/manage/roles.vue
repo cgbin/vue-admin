@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <!-- 搜索 -->
-    <div  class="filter-container">
+    <div v-permission="'admin.groups@search'" class="filter-container">
       <el-form :inline="true" :model="listQuery" class="form-inline">
         <el-form-item label="">
           <el-input v-model="listQuery.title" placeholder="名称" clearable size="small" />
@@ -27,12 +27,12 @@
       <el-col :xs="24" :sm="24" :lg="24">
 
           <el-button v-waves type="warning" icon="el-icon-refresh" size="small"  @click="handleFilterClear" >刷新</el-button>
-          <el-button v-waves type="success" icon="el-icon-plus" size="small" @click="handleCreate" >添加角色</el-button>      
-          <el-button v-waves :loading="deleting" 
+          <el-button v-permission="'admin.groups@save'" v-waves type="success" icon="el-icon-plus" size="small" @click="handleCreate" >添加角色</el-button>      
+          <el-button v-permission="'admin.groups@delall'" v-waves :loading="deleting" 
           :disabled="buttonDisabled" size="small" type="danger" icon="el-icon-delete" 
            @click="handleDeleteAll()">批量删除</el-button>
 
-        <el-tooltip content="更多" placement="top">
+        <el-tooltip content="更多" placement="top" v-permission="'admin.groups@changeall'">
           <el-dropdown trigger="click" placement="bottom" style="margin-left: 10px;" @command="handleCommand">
             <el-button :disabled="buttonDisabled" type="Info" circle>
               <i class="el-icon-more" />
@@ -75,8 +75,8 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="180px" class-name="small-padding">
         <template slot-scope="scope">
-            <el-button v-waves type="primary" icon="el-icon-edit-outline" size="small" @click="handleUpdate(scope.$index,scope.row.id)" >编辑</el-button>
-            <el-button v-waves :loading="scope.row.delete" type="danger" icon="el-icon-delete" size="small" @click="handleDelete(scope.$index,scope.row.id)" >删除</el-button>
+            <el-button v-permission="'admin.groups@edit'" v-waves type="primary" icon="el-icon-edit-outline" size="small" @click="handleUpdate(scope.$index,scope.row.id)" >编辑</el-button>
+            <el-button v-permission="'admin.groups@del'" v-waves :loading="scope.row.delete" type="danger" icon="el-icon-delete" size="small" @click="handleDelete(scope.$index,scope.row.id)" >删除</el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -97,10 +97,10 @@
       <el-table-column label="操作" align="center" width="120px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="scope">
           <el-tooltip content="编辑" placement="top">
-            <el-button v-permission="'/article/blog/edit'" v-waves type="primary" icon="el-icon-edit-outline" circle @click="handleUpdate(scope.$index,scope.row.id)" />
+            <el-button v-permission="'admin.article@edit'" v-waves type="primary" icon="el-icon-edit-outline" circle @click="handleUpdate(scope.$index,scope.row.id)" />
           </el-tooltip>
           <el-tooltip content="删除" placement="top">
-            <el-button v-permission="'/article/blog/delete'" v-waves :loading="scope.row.delete" type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index,scope.row.id)" />
+            <el-button v-permission="'admin.article@del'" v-waves :loading="scope.row.delete" type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index,scope.row.id)" />
           </el-tooltip>
         </template>
       </el-table-column>

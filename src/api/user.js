@@ -48,7 +48,7 @@ export function modify(data) {
 
 export function save(data) {
   return request({
-    url: '/admin/admin/save',
+    url: data.id > 0? '/admin/admin/edit' :'/admin/admin/save',
     method: 'post',
     data
   })

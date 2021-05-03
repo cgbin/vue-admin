@@ -88,10 +88,10 @@ export default {
           const _this = this
           modify(this.temp).then(response => {
             if (response.status === 1) {
-              store.commit('SET_AVATAR', _this.temp.img)
-              store.commit('SET_REALNAME', _this.temp.realname)
-              store.commit('SET_PHONE', _this.temp.phone)
-              store.commit('SET_EMAIL', _this.temp.email)
+              store.commit('user/SET_AVATAR', _this.temp.img)
+              store.commit('user/SET_REALNAME', _this.temp.realname)
+              store.commit('user/SET_PHONE', _this.temp.phone)
+              store.commit('user/SET_EMAIL', _this.temp.email)
               _this.$message.success(response.msg)
             } else {
               _this.$message.error(response.msg)

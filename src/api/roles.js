@@ -25,7 +25,7 @@ export function getinfo(id) {
 
 export function save(data) {
   return request({
-    url: '/admin/groups/save',
+    url: data.id > 0? '/admin/groups/edit' :'/admin/groups/save',
     method: 'post',
     data
   })

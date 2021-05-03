@@ -25,7 +25,7 @@ export function getinfo(id) {
 
 export function save(data) {
   return request({
-    url: '/admin/articlecolumn/save',
+    url: data.id > 0? '/admin/articlecolumn/edit' : '/admin/articlecolumn/save',
     method: 'post',
     data
   })

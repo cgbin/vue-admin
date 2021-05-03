@@ -3,7 +3,7 @@
     v-if="dialogFormVisible"
     :title="dialogTitle"
     ref="drawer"
-    width="760px"
+    width="380px"
     @close="handleClose(0)"
     :visible.sync="dialogFormVisible"
   >
@@ -20,6 +20,7 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="权限">
+             <el-scrollbar style="height: 39vh;" wrap-class="tree-scrollbar-wrapper"> 
               <el-tree
                 ref="tree"
                 :data="treeData"
@@ -29,6 +30,7 @@
                 show-checkbox   
                 node-key="id"
               />
+             </el-scrollbar>
             </el-form-item>
       </el-form>
     </div>
@@ -171,3 +173,7 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+
+</style>
