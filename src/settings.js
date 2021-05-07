@@ -12,8 +12,8 @@ module.exports = {
   // 上传路径
   uploadUrl: {
     img: '/admin/upload/upimg',
-    video: '',
-    file: ''
+    video: '/admin/upload/upvedio',
+    file: '/admin/upload/upfile'
   },
 
   // 配置显示在浏览器标签的title

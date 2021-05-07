@@ -37,8 +37,9 @@
           </el-tab-pane>
           <el-tab-pane label="文章详情">
             <el-form-item label="详情" prop="content">
-              <el-input v-model="temp.content" rows="20" type="textarea" clearable />
+              <tinymce v-model="temp.content" :height="300" />
             </el-form-item>
+            <div class="editor-content" v-html="temp.content" />
           </el-tab-pane>
         </el-tabs>
 
@@ -52,6 +53,8 @@
 </template>
 
 <script>
+//引入Tinymce富文本编辑器
+import Tinymce from '@/components/Tinymce'
 import Uploadone from '@/components/Upload/singleImage'
 import { getListAll as getListAllCate } from '@/api/categery'
 import { getinfo, save } from '@/api/blog'
@@ -60,7 +63,7 @@ import { getToken } from '@/utils/auth'
 
 export default {
   name: 'BlogForm',
-  components: { Uploadone },
+  components: { Uploadone, Tinymce },
   data() {
     return {
       btnLoading: false,
