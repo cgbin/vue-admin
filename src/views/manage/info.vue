@@ -11,7 +11,8 @@
         <el-input v-model="temp.password" clearable placeholder="不修改，则留空" />
       </el-form-item>
       <el-form-item label="头像" prop="img">
-        <Uploadone v-model="temp.img" :config="config" :header="header" />
+        <!-- <Uploadone v-model="temp.img" :config="config" :header="header" /> -->
+        <el-button type="primary" @click="chooseImage()">添加头像</el-button>
       </el-form-item>
       <el-form-item label="姓名" prop="realname">
         <el-input v-model="temp.realname" clearable />
@@ -37,6 +38,7 @@ import { getToken } from '@/utils/auth'
 
 export default {
   name: 'MyInfo',
+  inject: ['$app'],
   components: { Uploadone },
   data() {
     return {
@@ -81,6 +83,9 @@ export default {
 
   },
   methods: {
+    chooseImage() {
+      this.$app.chooseImage()
+    },
     saveData() {
       this.btnLoading = true
       this.$refs['dataForm'].validate((valid) => {
