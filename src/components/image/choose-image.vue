@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-dialog
+      v-if="chooseImageModel"
       title="选择图片"
       :visible.sync="chooseImageModel"
       width="80vw"
@@ -11,32 +12,13 @@
         class="position-relative"
         style="height: 70vh;margin: -30px -20px;"
       >
-        <el-header class="d-flex align-items-center border-bottom">
-          <div class="d-flex mr-auto">
-            <el-select
-              v-model="sort"
-              placeholder="请选择图片排序方式"
-              size="small"
-              @change="imageSort"
-            >
-              <el-option label="升序" value="asc"></el-option>
-              <el-option label="降序" value="desc"></el-option>
-            </el-select>
-            <el-input
-              v-model="keyword"
-              placeholder="请输入要搜索的图片名"
-              size="small"
-              class="mx-2"
-            ></el-input>
-          </div>
-          <el-button
-            v-if="chooseList.length"
-            type="warning"
-            size="small"
-            @click="unChoose"
-            >取消选中</el-button
-          >
-        </el-header>
+      <image-header
+        ref="imageHeader"
+        :chooseList="chooseList"
+        @create="openAlbumModel"
+        @imageSort="imageSort"
+      ></image-header>
+
         <el-container>
           <el-aside
             width="200px"
@@ -46,12 +28,13 @@
             <!-- 相册列表 -->
             <ul class="list-group list-group-flush">
               <album-item
-                v-for="(album, index) in getCurPageAlbum"
+                v-for="(album, index) in albumList"
                 :key="index"
                 :album="album"
                 :index="index"
                 :active="albumIndex === index"
-                :showOptions="false"
+                :showOptions="true"
+                @update="openAlbumModel"
               ></album-item>
             </ul>
           </el-aside>
@@ -115,10 +98,47 @@
         <img :src="previewUrl" class="w-100" />
       </div>
     </el-dialog>
+
+    <!-- 创建 | 修改相册 -->
+    <el-dialog
+      :title="albumEditIndex > -1 ? '修改相册' : '创建相册'"
+      :visible.sync="albumModel"
+      :destroy-on-close="true"
+      @close="closeAlbumModel"
+    >
+      <el-form :model="albumForm" :rules="formRules" label-width="80px">
+        <el-form-item label="相册名称" prop="name">
+          <el-input
+            v-model="albumForm.name"
+            size="medium"
+            placeholder="请输入相册名称"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="相册排序">
+          <el-input-number
+            v-model="albumForm.order"
+            :min="0"
+            size="medium"
+          ></el-input-number>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="albumModel = false">取 消</el-button>
+        <el-button
+          type="primary"
+          :disabled="albumForm.name === ''"
+          @click="confirmAlbumModel"
+          >确 定</el-button
+        >
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
+import { getAlbums, getImages } from '@/api/image'
+import imageHeader from '@/components/image/image-header'
 import albumItem from '@/components/image/album-item'
 import imageItem from '@/components/image/image-item'
 import { mapState } from 'vuex'
@@ -132,6 +152,7 @@ export default {
   components: {
     albumItem,
     imageItem,
+    imageHeader
   },
   props: {
     max: { type: Number, default: 9 },
@@ -144,6 +165,7 @@ export default {
         size: 10,
         total: 0,
       },
+      albumList:[],//相册列表
       album: {
         current: 1,
         size: 5,
@@ -159,12 +181,25 @@ export default {
       imageList: [],
       chooseImageModel: false,
       callback: false,
+      // 相册表单数据
+      albumModel: false,
+      albumForm: {
+        id: 0,
+        name: '',
+        order: 0,
+        imagesCount: 0,
+        imageList: [],
+      },
+      formRules: {
+        name: [
+          { required: true, message: '相册名称不能为空', trigger: 'blur' },
+        ],
+      },
+      albumIndex: 0,
+      albumEditIndex:-1
     }
   },
   computed: {
-    ...mapState({
-      albumList: (state) => state.image.albumList,
-    }),
     // 图片分页处理和搜索结果
     getCurPageImage: {
       get() {
@@ -203,23 +238,15 @@ export default {
         this.unChoose()
       },
     },
-    // 相册分页处理
-    getCurPageAlbum() {
-      const albumShow = []
-      const totalPage = Math.ceil(this.albumList.length / this.album.size)
-      for (let index = 0; index < totalPage; index++) {
-        albumShow[index] = this.albumList.slice(
-          this.album.size * index,
-          this.album.size * (index + 1),
-        )
-      }
-      return albumShow[this.album.current - 1]
-    },
   },
   watch: {
     keyword(value) {
       this.getCurPageImage = value
     },
+  },
+  created(){
+    this.getCurPageAlbum();
+    this.getImageList();
   },
   mounted() {
     this.$on('view', (image) => {
@@ -228,33 +255,39 @@ export default {
     })
   },
   methods: {
-    // 页面数据初始化
-    __init() {
-      // vuex中没有数据
-      if (!this.albumList.length) {
-        this.$store.dispatch('image/getAlbums').then(async (res) => {
-          this.album.total = this.albumList.length
-          const { imageList } = await this.$store.dispatch(
-            'image/getImages',
-            this.albumList[0].id,
-          )
-          this.imageList = imageList
-          this.page.total = imageList.length
-        })
+    // 请求相册列表
+    getCurPageAlbum() {
+        getAlbums(this.album)
+          .then((response) => {
+            const { data } = response
+            this.albumList = data.albumList
+            this.album.total = data.total
+          })
+          .catch((error) => {})
+    },
+     // 获取图片列表
+    getImageList() {
+       getImages(this.page)
+          .then((response) => {
+            const { data } = response
+            this.imageList = data.imageList
+            this.page.total = data.total
+          })
+          .catch((error) => {})
+    },
+    //图片排序
+    imageSort(sort) {
+     if (sort === 'asc') {
+          this.imageList.sort((a, b) => {
+            return a.id - b.id
+          })
       } else {
-        // vuex中有数据
-        this.album.total = this.albumList.length
-        this.imageList = this.albumList[0].imageList
-        this.page.total = this.imageList.length
+          this.imageList.sort((a, b) => {
+            return b.id - a.id
+          })
       }
     },
-    imageSort(sort) {
-      this.$store.commit('image/SET_sort', sort)
-      this.$store.commit('image/SORT_imageList')
-    },
     showDialog(callback) {
-      this.__init()
-      this.callback = callback
       this.keyword = ''
       // this.searchList = []
       this.albumIndex = 0
@@ -270,28 +303,85 @@ export default {
       }
       this.hide()
     },
+        // 编辑相册
+    updateAlbum() {
+      const curAlbum = this.getCurPageAlbum[this.albumEditIndex]
+      const bol =
+        curAlbum.name !== this.albumForm.name ||
+        curAlbum.order !== this.albumForm.order
+      // 相册名或排序有更改的情况下才执行
+      if (bol) {
+        this.$store.commit('image/UPDATE_albumList', {
+          id: this.albumForm.id,
+          value: this.albumForm,
+        })
+        this.$message({
+          message: '修改成功',
+          type: 'success',
+        })
+      }
+      this.closeAlbumModel()
+    },
+    // 打开模态框
+    openAlbumModel(obj) {
+      // 修改相册
+      if (obj) {
+        const { album, index } = obj
+        this.albumForm = { ...album }
+        this.albumEditIndex = index
+        return (this.albumModel = true)
+      }
+      // 创建相册
+      this.albumForm = {
+        id: this.albumList.length + 1,
+        name: '',
+        order: 50,
+        imagesCount: 0,
+        imageList: [],
+      }
+      this.albumEditIndex = -1
+      this.albumModel = true
+    },
+    // 确认模态框数据
+    confirmAlbumModel() {
+      if (this.albumForm.name !== '') {
+        // 判断是否为修改
+        if (this.albumEditIndex > -1) {
+          return this.updateAlbum()
+        }
+        // 创建相册
+        this.albumList.unshift({ ...this.albumForm })
+        this.$store
+          .dispatch('image/getImages', this.albumForm.id)
+          .then((response) => {
+            const { imageList } = response
+            this.albumList[0].imageList = imageList
+            this.albumList[0].imagesCount = imageList.length
+            this.$store.commit('image/SET_albumList', this.albumList)
+          })
+        this.albumIndex++
+        this.album.total = this.albumList.length
+        if (this.albumIndex === this.getCurPageAlbum.length) {
+          this.albumPageChange(++this.album.current)
+        }
+      }
+      this.closeAlbumModel()
+    },
+    // 关闭模态框
+    closeAlbumModel() {
+      this.albumForm = {
+        id: 0,
+        name: '',
+        order: 0,
+        imagesCount: 0,
+        imageList: [],
+      }
+      this.albumModel = false
+    },
     // 取消选中的图片
     unChoose() {
       this.imageList.forEach((img) => (img.isCheck = false))
       this.chooseList = []
-    },
-    // 获取图片列表
-    getImageList() {
-      const curAlbum = this.getCurPageAlbum[this.albumIndex]
-      // 如果当前相册的图片列表为空,则发起请求
-      if (curAlbum.imageList.length === 0) {
-        this.$store
-          .dispatch('image/getImages', curAlbum.id)
-          .then((response) => {
-            const { imageList } = response
-            this.imageList = imageList
-            this.page.total = imageList.length
-          })
-      } else {
-        // 否则从vuex获取数据
-        this.imageList = curAlbum.imageList
-        this.page.total = this.imageList.length
-      }
     },
     // 切换相册页码
     albumPageChange(val) {
@@ -338,11 +428,11 @@ dl, ol, ul {
 }
 
 aside{
-  background: none;
-  padding: none; 
-  margin-bottom: none; 
-  line-height: auto !important;
-  font-size: auto !important;
+  background:#fff ;
+  padding:0px; 
+  margin-bottom:0px; 
+  line-height:20px;
+  font-size: 14px;
 }
 
 .border {
@@ -358,8 +448,12 @@ aside{
 .d-flex {
     display: flex;
 }
-.ml-2,.mx-2{
-    margin-left: .5rem;
+.ml-2, .mx-2 {
+    margin-left: .5rem!important;
+}
+
+.w-50 {
+    width: 50%!important;
 }
 .el-dialog__header {
      border-bottom: none; 

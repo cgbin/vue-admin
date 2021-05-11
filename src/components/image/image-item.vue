@@ -37,13 +37,6 @@
                 type="success"
                 @click="$image.$emit('view', image)"
               ></el-button>
-              <el-button
-                class="p-2"
-                size="mini"
-                type="primary"
-                icon="el-icon-edit"
-                @click="updateImage(image)"
-              ></el-button>
               <el-popconfirm
                 title="是否删除该图片？"
                 @onConfirm="delImage(image)"
@@ -73,30 +66,6 @@ export default {
     index: Number,
   },
   methods: {
-    // 修改图片名称
-    updateImage(image) {
-      this.$prompt('', '请输入图片名称', {
-        inputPlaceholder: '请输入图片名称',
-        inputValue: image.name.slice(0, image.name.indexOf('.')),
-        inputValidator(value) {
-          if (value === '') {
-            return '图片名称不能为空'
-          }
-        },
-      })
-        .then(({ value }) => {
-          this.$store.commit('image/UPDATE_imageName', {
-            albumIdx: this.$image.albumIndex,
-            imgId: image.id,
-            value,
-          })
-          this.$message({
-            message: '修改成功',
-            type: 'success',
-          })
-        })
-        .catch(() => {})
-    },
     // 选择图片
     chooseImage(img) {
       const image = this.$image

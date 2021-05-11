@@ -25,10 +25,14 @@
       </el-form-item>
     </el-form>
     <el-button :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
+   
+   <choose-image ref="chooseImage" v-if="showImgDialog" :max="maxChooseImage"></choose-image>
   </div>
 </template>
 
 <script>
+import chooseImage from '@/components/image/choose-image'
+
 import Uploadone from '@/components/Upload/singleImage'
 import { modify } from '@/api/user'
 import { mapGetters } from 'vuex'
@@ -38,10 +42,11 @@ import { getToken } from '@/utils/auth'
 
 export default {
   name: 'MyInfo',
-  inject: ['$app'],
-  components: { Uploadone },
+  components: { Uploadone,chooseImage },
   data() {
     return {
+      maxChooseImage: 9,
+      showImgDialog:false,
       btnLoading: false,
       temp: {
         password: '',
@@ -83,8 +88,12 @@ export default {
 
   },
   methods: {
-    chooseImage() {
-      this.$app.chooseImage()
+    chooseImage(callback= {}, max = 9) {
+      this.showImgDialog = true;
+      this.$nextTick(()=>{
+        this.maxChooseImage = max
+        this.$refs.chooseImage.showDialog(callback)
+      })
     },
     saveData() {
       this.btnLoading = true

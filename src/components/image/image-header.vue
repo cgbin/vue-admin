@@ -3,6 +3,7 @@
     <el-header class="d-flex align-items-center border-bottom">
       <div class="d-flex mr-auto flex-fill">
         <el-select
+        
           v-model="sort"
           placeholder="请选择图片排序方式"
           size="small"
@@ -61,19 +62,6 @@
         </el-upload>
       </div>
     </el-dialog>
-    <!-- 图片预览 -->
-    <el-dialog
-      :visible.sync="previewModel"
-      @close="closePreviewModel"
-      width="70vw"
-      top="5vh"
-      :show-close="false"
-      :destroy-on-close="true"
-    >
-      <div style="margin: -60px -20px -30px">
-        <img :src="previewUrl" class="w-100" />
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -88,13 +76,6 @@ export default {
       previewModel: false,
       previewUrl: '',
     }
-  },
-  mounted() {
-    // 图片预览
-    this.$image.$on('view', (image) => {
-      this.previewUrl = image.url
-      this.previewModel = true
-    })
   },
   methods: {
     // 批量删除图片
@@ -143,13 +124,8 @@ export default {
         })
         .catch(() => {})
     },
-    closePreviewModel() {
-      this.previewUrl = ''
-      this.previewModel = false
-    },
     imageSort(sort) {
-      this.$store.commit('image/SET_sort', sort)
-      this.$store.commit('image/SORT_imageList')
+       this.$emit('imageSort',sort);
     },
     // 文件上传成功时的钩子, 接收mockjs返回的结果
     uploadSuccess(response, file, fileList) {
@@ -174,4 +150,12 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.w-50,.el-select {
+    width: 50%!important;
+}
+.ml-2, .mx-2 {
+    margin-left: .5rem!important;
+     margin-right: .5rem!important;
+}
+</style>

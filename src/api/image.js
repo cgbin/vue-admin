@@ -1,18 +1,18 @@
 import request from '@/utils/request'
 
-function getAlbums(data = {}) {
+function getAlbums(query = {}) {
   return request({
     url: '/admin/image/getalbums',
     method: 'post',
-    data,
+    data: query,
   })
 }
 
-function getImages(data = {}) {
+function getImages(query = {}) {
   return request({
     url: '/admin/image/getimages',
     method: 'post',
-    data,
+    data: query,
   })
 }
 
