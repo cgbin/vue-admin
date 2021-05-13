@@ -164,11 +164,11 @@ export default {
     // dialogFormVisible: function() {
     //   this.resetTemp()
     // },
-    temp: {
-      handler(newVal, oldVal) {},
-      immediate: true,
-      deep: true
-    }
+    // temp: {
+    //   handler(newVal, oldVal) {},
+    //   immediate: true,
+    //   deep: true
+    // }
   },
   created() {
      

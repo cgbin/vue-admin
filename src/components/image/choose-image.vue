@@ -15,7 +15,7 @@
       <image-header
         ref="imageHeader"
         :chooseList="chooseList"
-        @create="openAlbumModel"
+        @create="openAlbumModel()"
         @imageSort="imageSort"
       ></image-header>
 
@@ -63,7 +63,7 @@
               :page-size="album.size"
               :total="album.total"
               class="d-flex align-items-center justify-content-center"
-              @current-change="albumPageChange"
+              @current-change="albumPageChange()"
             >
             </el-pagination>
           </el-aside>
@@ -76,14 +76,14 @@
               layout="total, sizes, prev, pager, next, jumper"
               :total="page.total"
               @size-change="pageSizeChange"
-              @current-change="curPageChange"
+              @current-change="curPageChange()"
             ></el-pagination>
           </div>
         </el-footer>
       </el-container>
       <span slot="footer">
         <el-button @click="hide">取 消</el-button>
-        <el-button type="primary" @click="confirm">确 定</el-button>
+        <el-button type="primary" @click="confirm()">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 图片预览 -->
@@ -104,9 +104,9 @@
       :title="albumEditIndex > -1 ? '修改相册' : '创建相册'"
       :visible.sync="albumModel"
       :destroy-on-close="true"
-      @close="closeAlbumModel"
+      @close="closeAlbumModel()"
     >
-      <el-form :model="albumForm" :rules="formRules" label-width="80px">
+      <el-form :model="albumForm" :rules="formRules" ref="album_form" label-width="80px">
         <el-form-item label="相册名称" prop="name">
           <el-input
             v-model="albumForm.name"
@@ -116,7 +116,7 @@
         </el-form-item>
         <el-form-item label="相册排序">
           <el-input-number
-            v-model="albumForm.order"
+            v-model="albumForm.sorts"
             :min="0"
             size="medium"
           ></el-input-number>
@@ -127,7 +127,7 @@
         <el-button
           type="primary"
           :disabled="albumForm.name === ''"
-          @click="confirmAlbumModel"
+          @click="confirmAlbumModel()"
           >确 定</el-button
         >
       </div>
@@ -137,11 +137,10 @@
 </template>
 
 <script>
-import { getAlbums, getImages } from '@/api/image'
+import { getAlbums, getImages , addAlbums, editAlbums} from '@/api/image'
 import imageHeader from '@/components/image/image-header'
 import albumItem from '@/components/image/album-item'
 import imageItem from '@/components/image/image-item'
-import { mapState } from 'vuex'
 export default {
   name: 'chooseImage',
   provide() {
@@ -171,7 +170,6 @@ export default {
         size: 5,
         total: 0,
       },
-      albumIndex: 0,
       sort: 'asc',
       previewModel: false,
       previewUrl: '',
@@ -180,14 +178,13 @@ export default {
       searchList: [],
       imageList: [],
       chooseImageModel: false,
-      callback: false,
       // 相册表单数据
       albumModel: false,
       albumForm: {
         id: 0,
         name: '',
-        order: 0,
-        imagesCount: 0,
+        sorts: 100,
+        images_count: 0,
         imageList: [],
       },
       formRules: {
@@ -260,10 +257,9 @@ export default {
         getAlbums(this.album)
           .then((response) => {
             const { data } = response
-            this.albumList = data.albumList
+            this.albumList = data.data
             this.album.total = data.total
           })
-          .catch((error) => {})
     },
      // 获取图片列表
     getImageList() {
@@ -273,7 +269,6 @@ export default {
             this.imageList = data.imageList
             this.page.total = data.total
           })
-          .catch((error) => {})
     },
     //图片排序
     imageSort(sort) {
@@ -287,40 +282,34 @@ export default {
           })
       }
     },
-    showDialog(callback) {
+    showDialog() {
       this.keyword = ''
       // this.searchList = []
-      this.albumIndex = 0
+      this.albumIndex = 0 
       this.chooseImageModel = true
     },
     hide() {
       this.unChoose()
       this.chooseImageModel = false
+      this.$emit('closeAlbumDialog')
     },
     confirm() {
-      if (typeof this.callback === 'function' && this.chooseList.length) {
-        this.callback(this.chooseList)
+      if (this.chooseList.length) {
+        
       }
       this.hide()
     },
         // 编辑相册
     updateAlbum() {
-      const curAlbum = this.getCurPageAlbum[this.albumEditIndex]
-      const bol =
-        curAlbum.name !== this.albumForm.name ||
-        curAlbum.order !== this.albumForm.order
-      // 相册名或排序有更改的情况下才执行
-      if (bol) {
-        this.$store.commit('image/UPDATE_albumList', {
-          id: this.albumForm.id,
-          value: this.albumForm,
-        })
-        this.$message({
-          message: '修改成功',
-          type: 'success',
-        })
-      }
-      this.closeAlbumModel()
+      editAlbums(this.albumForm).then(response=>{
+          if (response.status === 1) {
+            this.$message.success(response.msg)
+            this.albumList[this.albumEditIndex] = this.albumForm
+            this.closeAlbumModel()
+          } else {
+            this.$message.error(response.msg)
+          }
+      })
     },
     // 打开模态框
     openAlbumModel(obj) {
@@ -333,47 +322,50 @@ export default {
       }
       // 创建相册
       this.albumForm = {
-        id: this.albumList.length + 1,
+        id: 0,
         name: '',
-        order: 50,
-        imagesCount: 0,
+        sorts: 100,
+        images_count: 0,
         imageList: [],
       }
       this.albumEditIndex = -1
       this.albumModel = true
     },
     // 确认模态框数据
-    confirmAlbumModel() {
-      if (this.albumForm.name !== '') {
-        // 判断是否为修改
-        if (this.albumEditIndex > -1) {
-          return this.updateAlbum()
+     confirmAlbumModel() {
+      this.$refs['album_form'].validate( (valid) => {
+          if (valid) {
+            // 判断是否为修改
+            if (this.albumEditIndex > -1) {
+              return this.updateAlbum()
+            }
+            // 创建相册
+            addAlbums(this.albumForm).then(response => {
+                if (response.status === 1) {
+                  this.albumList.unshift({ ...this.albumForm })
+                  this.$message.success(response.msg)
+                  this.albumIndex++
+                  this.album.total = this.albumList.length
+                  this.closeAlbumModel()
+                } else {
+                  this.$message.error(response.msg)
+                }
+                if (this.albumIndex === this.getCurPageAlbum.length) {
+                  this.albumPageChange(++this.album.current)
+                }
+            });
+
         }
-        // 创建相册
-        this.albumList.unshift({ ...this.albumForm })
-        this.$store
-          .dispatch('image/getImages', this.albumForm.id)
-          .then((response) => {
-            const { imageList } = response
-            this.albumList[0].imageList = imageList
-            this.albumList[0].imagesCount = imageList.length
-            this.$store.commit('image/SET_albumList', this.albumList)
-          })
-        this.albumIndex++
-        this.album.total = this.albumList.length
-        if (this.albumIndex === this.getCurPageAlbum.length) {
-          this.albumPageChange(++this.album.current)
-        }
-      }
-      this.closeAlbumModel()
+      })
+      
     },
     // 关闭模态框
     closeAlbumModel() {
       this.albumForm = {
         id: 0,
         name: '',
-        order: 0,
-        imagesCount: 0,
+        sorts: 100,
+        images_count: 0,
         imageList: [],
       }
       this.albumModel = false

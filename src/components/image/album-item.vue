@@ -6,7 +6,7 @@
       style="cursor: pointer"
       @click.stop="chooseAlbum(index)"
     >
-      <el-badge :value="album.imagesCount" class="p-1 album-badge" type="primary">
+      <el-badge :value="album.images_count" class="p-1 album-badge" type="primary">
         <span>{{ album.name }}</span>
       </el-badge>
       <el-dropdown
@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import { delAlbums} from '@/api/image'
+
 export default {
   name: 'AlbumItem',
   inject: ['$image'],
@@ -58,16 +60,23 @@ export default {
       const image = this.$image
       this.$confirm('是否删除该相册?', {
         type: 'warning',
-      })
-        .then(() => {
-          const id = image.getCurPageAlbum[index].id
+      }).then(() => {
+ 
+          const id = image.albumList[index].id
           const delIndex = image.albumList.findIndex((v) => v.id === id)
           if (delIndex === -1) return
           // index不等于0
           if (index !== 0) {
             image.albumIndex--
-            this.$store.commit('image/DELETE_albumList', delIndex)
-            image.getImageList()
+            delAlbums(id).then(response => {
+                if (response.status === 1) {
+                  this.$message.success(response.msg)
+                  image.getImageList()
+                } else {
+                  this.$message.error(response.msg)
+                }
+            });
+            
           } else {
             // index等于0且相册数量大于1
             if (image.getCurPageAlbum.length > 1) {
@@ -80,10 +89,6 @@ export default {
               image.imageList = []
             }
           }
-          this.$message({
-            type: 'success',
-            message: '删除成功!',
-          })
           image.album.total = image.albumList.length
           if (!image.getCurPageAlbum && image.album.current > 1) {
             image.albumPageChange(--image.album.current)

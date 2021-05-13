@@ -26,7 +26,7 @@
     </el-form>
     <el-button :loading="btnLoading" type="primary" @click="saveData()">保存</el-button>
    
-   <choose-image ref="chooseImage" v-if="showImgDialog" :max="maxChooseImage"></choose-image>
+   <choose-image ref="chooseImage" v-if="showImgDialog" :max="maxChooseImage" @closeAlbumDialog="closeAlbumDialog"></choose-image>
   </div>
 </template>
 
@@ -88,12 +88,15 @@ export default {
 
   },
   methods: {
-    chooseImage(callback= {}, max = 9) {
+    chooseImage( max = 9) {
       this.showImgDialog = true;
       this.$nextTick(()=>{
         this.maxChooseImage = max
-        this.$refs.chooseImage.showDialog(callback)
+        this.$refs.chooseImage.showDialog()
       })
+    },
+    closeAlbumDialog(){
+      this.showImgDialog = false;
     },
     saveData() {
       this.btnLoading = true
