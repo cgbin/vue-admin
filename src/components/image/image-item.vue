@@ -113,9 +113,9 @@ export default {
           image.page.total = image.imageList.length
         }
         if (!image.getCurPageImage) {
-          const totalPage = Math.ceil(image.imageList.length / image.page.size)
-          if (totalPage < image.page.current) {
-            image.page.current--
+          const totalPage = Math.ceil(image.imageList.length / image.page.psize)
+          if (totalPage < image.page.page) {
+            image.page.page--
           }
         }
       }

@@ -18,6 +18,15 @@ export function addAlbums(data  = {}) {
   })
 }
 
+//获取单个相册
+export function getOneAlbum(id) {
+  return request({
+    url: '/admin/image_album/getinfo',
+    method: 'post',
+    data:{ id },
+  })
+}
+
 // 修改相册
 export function editAlbums(data  = {}) {
   return request({

@@ -51,7 +51,7 @@ export default {
       if (image.albumIndex === index) return
       image.keyword = ''
       image.albumIndex = index
-      image.page.current = 1
+      image.page.page = 1
       image.getImageList()
       image.unChoose()
     },
@@ -65,34 +65,34 @@ export default {
           const id = image.albumList[index].id
           const delIndex = image.albumList.findIndex((v) => v.id === id)
           if (delIndex === -1) return
-          // index不等于0
-          if (index !== 0) {
-            image.albumIndex--
-            delAlbums(id).then(response => {
-                if (response.status === 1) {
+          
+          delAlbums(id).then(response => {
+              if (response.status === 1) {
                   this.$message.success(response.msg)
-                  image.getImageList()
-                } else {
-                  this.$message.error(response.msg)
-                }
-            });
-            
-          } else {
-            // index等于0且相册数量大于1
-            if (image.getCurPageAlbum.length > 1) {
-              this.$store.commit('image/DELETE_albumList', delIndex)
-              image.getImageList()
-            } else if (image.getCurPageAlbum.length === 1) {
-              // 删除最后一个相册的时候
-              this.$store.commit('image/DELETE_albumList', delIndex)
-              image.page.total = 0
-              image.imageList = []
-            }
-          }
-          image.album.total = image.albumList.length
-          if (!image.getCurPageAlbum && image.album.current > 1) {
-            image.albumPageChange(--image.album.current)
-          }
+                   // index不等于0
+                  if (index !== 0) {
+                    image.albumIndex--
+                    image.getImageList()
+                  } else {
+                    // index等于0且相册数量大于1
+                    if (image.getCurPageAlbum.length > 1) {
+                      image.getImageList()
+                    } else if (image.getCurPageAlbum.length === 1) {
+                      // 删除最后一个相册的时候
+                      image.page.total = 0
+                      image.imageList = []
+                    }
+                  }
+                  image.albumList.splice(delIndex,1) //删除当前相册
+                  image.album.total = image.albumList.length
+                  if (!image.getCurPageAlbum && image.album.page > 1) {
+                    image.albumPageChange(--image.album.page)
+                  } 
+              } else {
+                this.$message.error(response.msg)
+              }
+          });
+        
         })
         .catch(() => {})
     },

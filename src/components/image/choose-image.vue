@@ -60,7 +60,7 @@
           <el-aside width="200px" class="album-pagination">
             <el-pagination
               layout="prev, next"
-              :page-size="album.size"
+              :page-size="album.psize"
               :total="album.total"
               class="d-flex align-items-center justify-content-center"
               @current-change="albumPageChange()"
@@ -70,9 +70,9 @@
           <!-- 图片分页 -->
           <div class="text-center flex-fill">
             <el-pagination
-              :current-page="page.current"
+              :current-page="page.page"
               :page-sizes="page.sizes"
-              :page-size="page.size"
+              :page-size="page.psize"
               layout="total, sizes, prev, pager, next, jumper"
               :total="page.total"
               @size-change="pageSizeChange"
@@ -137,7 +137,7 @@
 </template>
 
 <script>
-import { getAlbums, getImages , addAlbums, editAlbums} from '@/api/image'
+import { getAlbums, getImages , addAlbums, getOneAlbum,editAlbums} from '@/api/image'
 import imageHeader from '@/components/image/image-header'
 import albumItem from '@/components/image/album-item'
 import imageItem from '@/components/image/image-item'
@@ -159,15 +159,15 @@ export default {
   data() {
     return {
       page: {
-        current: 1,
+        page: 1,
         sizes: [10, 20, 50],
-        size: 10,
+        psize: 10,
         total: 0,
       },
       albumList:[],//相册列表
       album: {
-        current: 1,
-        size: 5,
+        page: 1,
+        psize: 5,
         total: 0,
       },
       sort: 'asc',
@@ -206,14 +206,14 @@ export default {
           this.searchList.length || this.keyword
             ? this.searchList
             : this.imageList
-        const totalPage = Math.ceil(dataList.length / this.page.size)
+        const totalPage = Math.ceil(dataList.length / this.page.psize)
         for (let index = 0; index < totalPage; index++) {
           curData[index] = dataList.slice(
-            this.page.size * index,
-            this.page.size * (index + 1),
+            this.page.psize * index,
+            this.page.psize * (index + 1),
           )
         }
-        return curData[this.page.current - 1]
+        return curData[this.page.page - 1]
       },
       set(value) {
         let searchList = this.imageList
@@ -230,7 +230,7 @@ export default {
         if (this.searchList.length === this.imageList.length) {
           this.searchList = []
         }
-        this.page.current = 1
+        this.page.page = 1
         this.page.total = searchList.length
         this.unChoose()
       },
@@ -316,20 +316,30 @@ export default {
       // 修改相册
       if (obj) {
         const { album, index } = obj
-        this.albumForm = { ...album }
-        this.albumEditIndex = index
-        return (this.albumModel = true)
+        // 获取指定相册信息
+        getOneAlbum(album.id).then(response => {
+          if (response.status === 1) {
+            this.albumForm = response.data
+            this.albumEditIndex = index
+            this.albumModel = true
+          } else {
+            this.$message.error(response.msg)
+          }
+        })
+      
+      }else{
+          // 创建相册
+          this.albumForm = {
+            id: 0,
+            name: '',
+            sorts: 100,
+            images_count: 0,
+            imageList: [],
+          }
+          this.albumEditIndex = -1
+          this.albumModel = true
       }
-      // 创建相册
-      this.albumForm = {
-        id: 0,
-        name: '',
-        sorts: 100,
-        images_count: 0,
-        imageList: [],
-      }
-      this.albumEditIndex = -1
-      this.albumModel = true
+
     },
     // 确认模态框数据
      confirmAlbumModel() {
@@ -378,19 +388,19 @@ export default {
     // 切换相册页码
     albumPageChange(val) {
       this.keyword = ''
-      this.album.current = val
+      this.album.page = val
       this.albumIndex = 0
-      this.page.current = 1
+      this.page.page = 1
       this.getImageList()
       this.unChoose()
     },
     // 切换每页显示条数
     pageSizeChange(val) {
-      this.page.size = val
+      this.page.psize = val
     },
     // 改变页数
     curPageChange(val) {
-      this.page.current = val
+      this.page.page = val
     },
   },
 }
